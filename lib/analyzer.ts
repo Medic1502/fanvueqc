@@ -57,9 +57,7 @@ Flag ONLY genuine misspellings where the correct word is obvious:
 CATEGORY 3 — CHAT QUALITY (severity: WARNING)
 This is the most important category. Evaluate the FULL conversation context, not just the message in isolation.
 
-- DRY: Flag ONLY if the chatter's message is a single filler word/sound with zero substance — exactly things like: "ok", "okay", "mhm", "hmm", "hm", "yeah", "yh", "yep", "lol", "haha", "sure", "k". The message must add nothing at all. Do NOT flag: any message that contains a question, a greeting, a compliment, a statement, or ANY actual content — even if short. "hey, what you up to", "sounds good babe", "aww really?" are NOT dry.
-
-- ENGAGEMENT: ONLY flag if fan asked a CLEAR, SPECIFIC question (e.g. "Are you talking about X?", "What do you mean?", "Did you mean Y?") AND the chatter's response completely ignores that question with zero acknowledgment. Do NOT flag: open-ended chatter responses, casual redirects, different conversational direction, short or informal replies, chatter not addressing every point the fan made.
+- DRY: Flag ONLY if the chatter's message is a single filler word/sound with zero substance — exactly things like: "ok", "okay", "mhm", "hmm", "hm", "yeah", "yh", "yep", "lol", "haha", "sure", "k". The message must add nothing at all. CRITICAL: if the message contains a "?" anywhere, it is automatically NOT dry — it has a question. If the message contains more than one word that isn't a filler, it is NOT dry. "Yes, and you?", "hey, what you up to", "sounds good babe", "aww really?" are NOT dry.
 
 - SALES: ONLY flag if fan used an explicit refusal word — "no", "not interested", "I don't want", "stop", "leave me alone", "I already said no" — AND the chatter's VERY NEXT message pushes the same sale again. Do NOT flag: hesitation ("I don't know", "maybe", "I'll think about it", "not sure"), uncertainty, reluctance, fan asking questions about the offer, chatter continuing to engage or persuade after hesitation, any single sales mention, PPV mentions regardless of timing.
 
@@ -72,7 +70,7 @@ Do NOT flag: sexual content, adult themes, flirting, explicit language, encourag
 ---
 
 Respond ONLY with a JSON array. Each item must have:
-- type: "POACHING" | "TOS" | "INSULT" | "SPELLING" | "GRAMMAR" | "DRY" | "ENGAGEMENT" | "SALES" | "SLOW_REPLY"
+- type: "POACHING" | "TOS" | "INSULT" | "SPELLING" | "GRAMMAR" | "DRY" | "SALES" | "SLOW_REPLY"
 - category: "critical" | "spelling" | "quality"
 - severity: "CRITICAL" (only for category critical) | "WARNING" (for spelling and quality)
 - description: 1-2 sentences explaining the specific issue
