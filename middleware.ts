@@ -10,7 +10,8 @@ export function middleware(req: NextRequest) {
   }
 
   const token = req.cookies.get('app_auth')?.value
-  if (token === process.env.APP_PASSWORD) {
+  const expected = (process.env.APP_PASSWORD ?? '').trim()
+  if (expected && token === expected) {
     return NextResponse.next()
   }
 

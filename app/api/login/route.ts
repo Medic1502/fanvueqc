@@ -3,7 +3,11 @@ import { NextRequest, NextResponse } from 'next/server'
 export async function POST(req: NextRequest) {
   const { password } = await req.json()
 
-  if (password !== process.env.APP_PASSWORD) {
+  const expected = (process.env.APP_PASSWORD ?? '').trim()
+  if (!expected) {
+    return NextResponse.json({ error: 'APP_PASSWORD nije postavljen na serveru' }, { status: 500 })
+  }
+  if (password.trim() !== expected) {
     return NextResponse.json({ error: 'Pogrešna lozinka' }, { status: 401 })
   }
 
