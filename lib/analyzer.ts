@@ -59,8 +59,6 @@ This is the most important category. Evaluate the FULL conversation context, not
 
 - DRY: Flag ONLY if the chatter's message is a single filler word/sound with zero substance — exactly things like: "ok", "okay", "mhm", "hmm", "hm", "yeah", "yh", "yep", "lol", "haha", "sure", "k". The message must add nothing at all. CRITICAL: if the message contains a "?" anywhere, it is automatically NOT dry — it has a question. If the message contains more than one word that isn't a filler, it is NOT dry. "Yes, and you?", "hey, what you up to", "sounds good babe", "aww really?" are NOT dry.
 
-- SALES: ONLY flag if fan used an explicit refusal word — "no", "not interested", "I don't want", "stop", "leave me alone", "I already said no" — AND the chatter's VERY NEXT message pushes the same sale again. Do NOT flag: hesitation ("I don't know", "maybe", "I'll think about it", "not sure"), uncertainty, reluctance, fan asking questions about the offer, chatter continuing to engage or persuade after hesitation, any single sales mention, PPV mentions regardless of timing.
-
 - SLOW_REPLY: Only flag if reply time is provided AND it's clearly excessive given context:
   * Over 20 minutes when fan sent a direct engaged message or question
   * Do NOT flag if fan sent a simple one-liner or if the conversation doesn't suggest urgency
@@ -70,7 +68,7 @@ Do NOT flag: sexual content, adult themes, flirting, explicit language, encourag
 ---
 
 Respond ONLY with a JSON array. Each item must have:
-- type: "POACHING" | "TOS" | "INSULT" | "SPELLING" | "GRAMMAR" | "DRY" | "SALES" | "SLOW_REPLY"
+- type: "POACHING" | "TOS" | "INSULT" | "SPELLING" | "GRAMMAR" | "DRY" | "SLOW_REPLY"
 - category: "critical" | "spelling" | "quality"
 - severity: "CRITICAL" (only for category critical) | "WARNING" (for spelling and quality)
 - description: 1-2 sentences explaining the specific issue
