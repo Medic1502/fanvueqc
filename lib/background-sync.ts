@@ -129,7 +129,8 @@ async function syncOnce() {
           const msgTime = new Date(msg.sentAt ?? 0).getTime()
 
           let replyTimeSeconds: number | null = null
-          for (const prev of msgs) {
+          const msgsDesc = [...msgs].sort((a, b) => new Date(b.sentAt ?? 0).getTime() - new Date(a.sentAt ?? 0).getTime())
+          for (const prev of msgsDesc) {
             const prevTime = new Date(prev.sentAt ?? 0).getTime()
             if (prevTime >= msgTime || prev.sender?.uuid === creator.fanvueId) continue
             replyTimeSeconds = Math.round((msgTime - prevTime) / 1000)
@@ -163,7 +164,7 @@ async function syncOnce() {
             data: { fanvueId: msg.uuid, content, sentAt: new Date(msg.sentAt ?? Date.now()), chatterId: chatterRecord.id, creatorId: creator.id, fanUuid, fanName: chat.user?.displayName ?? chat.user?.handle ?? 'Fan', analysed: false, replyTimeSeconds },
           })
 
-          const contextMsgs = msgs
+          const contextMsgs = msgsDesc
             .filter(m => new Date(m.sentAt ?? 0).getTime() < msgTime)
             .slice(0, 8).reverse()
             .map(m => ({ role: (m.sender?.uuid === creator.fanvueId ? 'chatter' : 'fan') as 'chatter' | 'fan', text: m.text ?? '', sentAt: m.sentAt ?? '' }))

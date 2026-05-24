@@ -62,15 +62,9 @@ This is the most important category. Evaluate the FULL conversation context, not
   * AND there's no sign of active engagement in the recent history
   * Do NOT flag if the chatter has been actively engaging and this is just a short reply in a back-and-forth
 
-- ENGAGEMENT: Chatter is ignoring what the fan actually said. Flag if:
-  * Fan asked a direct question and chatter didn't address it at all
-  * Chatter pivots away from the fan's topic completely without acknowledging it
-  * Chatter gives a completely generic response that clearly didn't read the fan's message
+- ENGAGEMENT: ONLY flag if fan asked a CLEAR, SPECIFIC question (e.g. "Are you talking about X?", "What do you mean?", "Did you mean Y?") AND the chatter's response completely ignores that question with zero acknowledgment. Do NOT flag: open-ended chatter responses, casual redirects, different conversational direction, short or informal replies, chatter not addressing every point the fan made.
 
-- SALES: Only flag genuinely aggressive or tone-deaf sales behavior. Specifically:
-  * Fan explicitly said NO or declined, and chatter immediately pushes again anyway
-  * Chatter sends multiple sales pushes in a row with no engagement between them
-  * Do NOT flag: mentioning a PPV in the first few messages of ANY conversation (new or returning fan), normal upselling, "check out my PPV", "I have something for you", any single mention of paid content regardless of how early it comes. Chatters are salespeople — mentioning content early is their job.
+- SALES: ONLY flag if fan used an explicit refusal word — "no", "not interested", "I don't want", "stop", "leave me alone", "I already said no" — AND the chatter's VERY NEXT message pushes the same sale again. Do NOT flag: hesitation ("I don't know", "maybe", "I'll think about it", "not sure"), uncertainty, reluctance, fan asking questions about the offer, chatter continuing to engage or persuade after hesitation, any single sales mention, PPV mentions regardless of timing.
 
 - SLOW_REPLY: Only flag if reply time is provided AND it's clearly excessive given context:
   * Over 20 minutes when fan sent a direct engaged message or question
