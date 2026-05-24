@@ -45,7 +45,12 @@ export async function GET(req: NextRequest) {
     body: new URLSearchParams({
       grant_type: 'authorization_code',
       code,
-      redirect_uri: `${new URL(req.url).protocol}//${new URL(req.url).host}/api/auth/callback`,
+      redirect_uri: (() => {
+        const u = new URL(req.url)
+        const proto = req.headers.get('x-forwarded-proto') ?? u.protocol.replace(':', '')
+        const host = req.headers.get('x-forwarded-host') ?? u.host
+        return `${proto}://${host}/api/auth/callback`
+      })(),
       code_verifier: verifier,
     }),
   })

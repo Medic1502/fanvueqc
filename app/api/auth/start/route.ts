@@ -12,7 +12,9 @@ export async function GET(req: Request) {
   const challenge = base64url(crypto.createHash('sha256').update(verifier).digest())
 
   const reqUrl = new URL(req.url)
-  const baseUrl = `${reqUrl.protocol}//${reqUrl.host}`
+  const proto = req.headers.get('x-forwarded-proto') ?? reqUrl.protocol.replace(':', '')
+  const host = req.headers.get('x-forwarded-host') ?? reqUrl.host
+  const baseUrl = `${proto}://${host}`
 
   const params = new URLSearchParams({
     client_id: process.env.FANVUE_CLIENT_ID!,
