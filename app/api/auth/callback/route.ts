@@ -1,0 +1,98 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+
+function popupResult(success: boolean, message: string) {
+  const color = success ? '#34d399' : '#f87171'
+  const icon = success ? '✅' : '❌'
+  const sub = success ? 'Ovaj prozor se zatvara...' : 'Zatvori prozor i pokušaj ponovo.'
+  const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
+<style>body{font-family:sans-serif;background:#0f0f11;color:#f1f1f3;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;gap:12px;text-align:center;padding:24px}
+.icon{font-size:48px}.msg{color:${color};font-size:15px}.sub{color:#71717a;font-size:13px}</style></head>
+<body>
+<div class="icon">${icon}</div>
+<div class="msg">${message}</div>
+<div class="sub">${sub}</div>
+<script>if(window.opener){window.opener.location.reload();}${success ? 'setTimeout(()=>window.close(),1500);' : ''}</script>
+</body></html>`
+  return new NextResponse(html, { headers: { 'Content-Type': 'text/html' } })
+}
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url)
+  const code = searchParams.get('code')
+  const error = searchParams.get('error')
+
+  if (error || !code) {
+    return popupResult(false, `Greška: ${error ?? 'no_code'}`)
+  }
+
+  const verifier = req.cookies.get('pkce_verifier')?.value
+  if (!verifier) {
+    return popupResult(false, 'Greška: PKCE verifier nije pronađen. Pokušaj ponovo.')
+  }
+
+  const credentials = Buffer.from(
+    `${process.env.FANVUE_CLIENT_ID}:${process.env.FANVUE_CLIENT_SECRET}`
+  ).toString('base64')
+
+  const tokenRes = await fetch('https://auth.fanvue.com/oauth2/token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+      Authorization: `Basic ${credentials}`,
+    },
+    body: new URLSearchParams({
+      grant_type: 'authorization_code',
+      code,
+      redirect_uri: 'http://localhost:3000/api/auth/callback',
+      code_verifier: verifier,
+    }),
+  })
+
+  if (!tokenRes.ok) {
+    const text = await tokenRes.text()
+    return popupResult(false, `Token greška: ${tokenRes.status}. ${text.slice(0, 120)}`)
+  }
+
+  const tokenData = await tokenRes.json()
+  const accessToken = tokenData.access_token
+  const refreshToken = tokenData.refresh_token ?? null
+
+  // Fetch profile of whoever just logged in
+  const profileRes = await fetch('https://api.fanvue.com/users/me', {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      'X-Fanvue-API-Version': '2025-06-26',
+    },
+  })
+
+  if (!profileRes.ok) {
+    return popupResult(false, 'Nije moguće učitati profil. Pokušaj ponovo.')
+  }
+
+  const profile = await profileRes.json()
+  const displayName = profile.displayName ?? profile.handle ?? 'Nepoznat'
+
+  if (profile.isCreator) {
+    await prisma.creator.upsert({
+      where: { fanvueId: profile.uuid },
+      update: { name: displayName, username: profile.handle, accessToken, refreshToken, connectedAt: new Date() },
+      create: { fanvueId: profile.uuid, name: displayName, username: profile.handle, accessToken, refreshToken, connectedAt: new Date() },
+    })
+    return popupResult(true, `${displayName} je uspešno povezan!`)
+  }
+
+  // Admin/agency account
+  const { writeFileSync, readFileSync, existsSync } = await import('fs')
+  const { join } = await import('path')
+  const envPath = join(process.cwd(), '.env.local')
+  let envContent = existsSync(envPath) ? readFileSync(envPath, 'utf8') : ''
+  if (envContent.includes('FANVUE_API_TOKEN=')) {
+    envContent = envContent.replace(/FANVUE_API_TOKEN=.*/g, `FANVUE_API_TOKEN=${accessToken}`)
+  } else {
+    envContent += `\nFANVUE_API_TOKEN=${accessToken}`
+  }
+  writeFileSync(envPath, envContent)
+
+  return popupResult(true, `Admin nalog (${displayName}) je sačuvan.`)
+}

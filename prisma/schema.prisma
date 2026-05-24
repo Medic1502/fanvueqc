@@ -1,0 +1,91 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Chatter {
+  id          String    @id @default(cuid())
+  fanvueId    String    @unique
+  name        String
+  username    String?
+  createdAt   DateTime  @default(now())
+  messages    Message[]
+}
+
+model Creator {
+  id           String       @id @default(cuid())
+  fanvueId     String       @unique
+  name         String
+  username     String?
+  accessToken  String?
+  refreshToken String?
+  connectedAt  DateTime?
+  messages     Message[]
+  seenAlerts   SeenAlert[]
+}
+
+model Message {
+  id          String    @id @default(cuid())
+  fanvueId    String    @unique
+  content     String
+  sentAt      DateTime
+  fetchedAt   DateTime  @default(now())
+
+  chatterId   String
+  chatter     Chatter   @relation(fields: [chatterId], references: [id])
+
+  creatorId   String
+  creator     Creator   @relation(fields: [creatorId], references: [id])
+
+  fanUuid     String?
+  fanName     String?
+
+  analysed         Boolean   @default(false)
+  replyTimeSeconds Int?
+  flags            Flag[]
+}
+
+model Flag {
+  id          String    @id @default(cuid())
+  messageId   String
+  message     Message   @relation(fields: [messageId], references: [id])
+
+  type        String    // "POACHING"|"TOS"|"INSULT"|"SPELLING"|"GRAMMAR"|"DRY"|"ENGAGEMENT"|"SALES"|"SLOW_REPLY"
+  category    String    @default("spelling") // "critical"|"spelling"|"quality"
+  severity    String    // "WARNING"|"CRITICAL"
+  description String
+  suggestion  String?
+
+  reviewed    Boolean   @default(false)
+  dismissed   Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+}
+
+model SeenAlert {
+  id           String    @id @default(cuid())
+  fanUuid      String
+  fanName      String?
+  fanHandle    String?
+  fanLastMsg   String?
+  fanLastMsgAt DateTime
+  creatorId    String
+  creator      Creator   @relation(fields: [creatorId], references: [id])
+  resolvedAt   DateTime?
+  dismissed    Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  @@unique([fanUuid, creatorId])
+}
+
+model SyncLog {
+  id          String    @id @default(cuid())
+  creatorId   String?
+  startedAt   DateTime  @default(now())
+  finishedAt  DateTime?
+  messagesFetched Int   @default(0)
+  error       String?
+}
