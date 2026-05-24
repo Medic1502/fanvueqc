@@ -85,19 +85,11 @@ export async function GET(req: NextRequest) {
       update: { name: displayName, username: profile.handle, accessToken, refreshToken, connectedAt: new Date() },
       create: { fanvueId: profile.uuid, name: displayName, username: profile.handle, accessToken, refreshToken, connectedAt: new Date() },
     })
-    return popupResult(true, `${displayName} je uspeÅ¡no povezan!`)
+    return popupResult(true, `${displayName} je uspešno povezan!`)
   }
 
-  // Admin/agency account
-  const { writeFileSync, readFileSync, existsSync } = await import('fs')
-  const { join } = await import('path')
-  const envPath = join(process.cwd(), '.env.local')
-  let envContent = existsSync(envPath) ? readFileSync(envPath, 'utf8') : ''
-  if (envContent.includes('FANVUE_API_TOKEN=')) {
-    envContent = envContent.replace(/FANVUE_API_TOKEN=.*/g, `FANVUE_API_TOKEN=${accessToken}`)
-  } else {
-    envContent += `\nFANVUE_API_TOKEN=${accessToken}`
-  }
+  // Not a creator account
+  return popupResult(false, `"${displayName}" nije kreator nalog. Odjavi se sa Fanvue-a i prijavi se kao kreator čiji nalog hoćeš da dodaš.`)
   writeFileSync(envPath, envContent)
 
   return popupResult(true, `Admin nalog (${displayName}) je saÄuvan.`)
