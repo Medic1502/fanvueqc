@@ -57,10 +57,7 @@ Flag ONLY genuine misspellings where the correct word is obvious:
 CATEGORY 3 — CHAT QUALITY (severity: WARNING)
 This is the most important category. Evaluate the FULL conversation context, not just the message in isolation.
 
-- DRY: The chatter's overall engagement in this conversation window is low-effort. Flag ONLY if:
-  * The message is extremely short AND adds nothing (e.g. "ok", "lol", "yeah") when the fan sent a substantive message
-  * AND there's no sign of active engagement in the recent history
-  * Do NOT flag if the chatter has been actively engaging and this is just a short reply in a back-and-forth
+- DRY: Flag ONLY if the chatter's message is a single filler word/sound with zero substance — exactly things like: "ok", "okay", "mhm", "hmm", "hm", "yeah", "yh", "yep", "lol", "haha", "sure", "k". The message must add nothing at all. Do NOT flag: any message that contains a question, a greeting, a compliment, a statement, or ANY actual content — even if short. "hey, what you up to", "sounds good babe", "aww really?" are NOT dry.
 
 - ENGAGEMENT: ONLY flag if fan asked a CLEAR, SPECIFIC question (e.g. "Are you talking about X?", "What do you mean?", "Did you mean Y?") AND the chatter's response completely ignores that question with zero acknowledgment. Do NOT flag: open-ended chatter responses, casual redirects, different conversational direction, short or informal replies, chatter not addressing every point the fan made.
 
