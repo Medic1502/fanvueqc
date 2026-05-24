@@ -151,28 +151,20 @@ export async function GET(req: NextRequest) {
     where: { accessToken: { not: null } },
   })
 
-  const newMessages: Array<{
-    id: string
-    messageUuid: string
-    model: string
-    modelUsername: string | null
-    chatter: string
-    chatterUsername: string | null
-    fan: string
-    content: string
-    sentAt: string
-    hasMedia: boolean
-    replyTimeSeconds: number | null
-  }> = []
+  type NewMessage = {
+    id: string; messageUuid: string; model: string; modelUsername: string | null
+    chatter: string; chatterUsername: string | null; fan: string; content: string
+    sentAt: string; hasMedia: boolean; replyTimeSeconds: number | null
+  }
+  type FanvueMsg = { uuid: string; sender?: { uuid?: string }; sentAt?: string; sentByUserId?: string | null; text?: string; hasMedia?: boolean }
 
-  for (const creator of creators) {
+  const perCreator = await Promise.all(creators.map(async (creator) => {
+    const msgs: NewMessage[] = []
     const tokenRef = { current: creator.accessToken! }
     const refreshToken = creator.refreshToken ?? null
 
-    // Only fetch most recent chats (first 2 pages = 100 chats)
     let page = 1
     let hasMore = true
-
     while (hasMore && page <= 2) {
       let chatsData
       try {
@@ -183,47 +175,41 @@ export async function GET(req: NextRequest) {
       hasMore = (chatsData as { pagination?: { hasMore?: boolean } })?.pagination?.hasMore ?? false
       page++
 
-      for (const chat of (chats as Array<{ lastMessageAt?: string; user?: { uuid?: string; displayName?: string; handle?: string } }>)) {
-        // Skip chats with no recent activity
-        if (!chat.lastMessageAt) continue
-        if (new Date(chat.lastMessageAt) < sinceDate) continue
+      const activeChats = (chats as Array<{ lastMessageAt?: string; user?: { uuid?: string; displayName?: string; handle?: string } }>)
+        .filter(c => c.lastMessageAt && new Date(c.lastMessageAt) >= sinceDate)
 
+      await Promise.all(activeChats.map(async (chat) => {
         const fanUuid: string = chat.user?.uuid ?? ''
-        if (!fanUuid) continue
+        if (!fanUuid) return
 
         let messagesData
         try {
           messagesData = await apiFetchWithRefresh(creator.id, tokenRef.current, refreshToken, `/chats/${fanUuid}/messages?size=20`, tokenRef)
-        } catch { continue }
+        } catch { return }
 
-        type FanvueMsg = { uuid: string; sender?: { uuid?: string }; sentAt?: string; sentByUserId?: string | null; text?: string; hasMedia?: boolean }
         const messages = ((messagesData as { data?: FanvueMsg[] })?.data ?? []) as FanvueMsg[]
 
         for (const msg of messages) {
           if (msg.sender?.uuid !== creator.fanvueId) continue
           if (new Date(msg.sentAt ?? 0) <= sinceDate) continue
-          if (!msg.sentByUserId) continue  // skip creator-sent and automated messages
+          if (!msg.sentByUserId) continue
 
-          // Already in DB?
           const existing = await prisma.message.findUnique({ where: { fanvueId: msg.uuid } })
           if (existing) continue
 
           const content: string = msg.text ?? ''
           const chatterFanvueId: string = msg.sentByUserId
-
-          // Calculate reply time: find most recent FAN message sent BEFORE this chatter message
-          // messages are sorted newest-first, so fan messages at higher indices are older
           const msgTime = new Date(msg.sentAt ?? 0).getTime()
+
           let replyTimeSeconds: number | null = null
           for (const prev of messages) {
             const prevTime = new Date(prev.sentAt ?? 0).getTime()
-            if (prevTime >= msgTime) continue          // skip same or newer
-            if (prev.sender?.uuid === creator.fanvueId) continue  // skip creator/chatter messages
+            if (prevTime >= msgTime) continue
+            if (prev.sender?.uuid === creator.fanvueId) continue
             replyTimeSeconds = Math.round((msgTime - prevTime) / 1000)
             break
           }
 
-          // Resolve chatter name (only needed for new chatters)
           let chatterName = `Chatter ${chatterFanvueId.slice(0, 8)}`
           let chatterUsername: string | null = null
           const existingChatter = await prisma.chatter.findUnique({ where: { fanvueId: chatterFanvueId } })
@@ -238,77 +224,53 @@ export async function GET(req: NextRequest) {
               chatterName = profile.displayName ?? profile.handle ?? chatterName
               chatterUsername = profile.handle ?? null
               chatterNameCache[chatterFanvueId] = chatterName
-            } catch { /* keep default name */ }
+            } catch { /* keep default */ }
           }
 
-          // Upsert chatter â€” never overwrite name (preserves user renames)
           const chatterRecord = await prisma.chatter.upsert({
             where: { fanvueId: chatterFanvueId },
             update: { username: chatterUsername },
             create: { fanvueId: chatterFanvueId, name: chatterName, username: chatterUsername },
           })
 
-          // Save message
           const savedMsg = await prisma.message.create({
             data: {
-              fanvueId: msg.uuid,
-              content,
+              fanvueId: msg.uuid, content,
               sentAt: new Date(msg.sentAt ?? Date.now()),
-              chatterId: chatterRecord.id,
-              creatorId: creator.id,
-              fanUuid,
-              fanName: chat.user?.displayName ?? chat.user?.handle ?? 'Fan',
-              analysed: false,
-              replyTimeSeconds,
+              chatterId: chatterRecord.id, creatorId: creator.id,
+              fanUuid, fanName: chat.user?.displayName ?? chat.user?.handle ?? 'Fan',
+              analysed: false, replyTimeSeconds,
             },
           })
 
-          // Build context: last 8 messages from this chat BEFORE this chatter message
           const contextMsgs = messages
             .filter(m => new Date(m.sentAt ?? 0).getTime() < msgTime)
-            .slice(0, 8)
-            .reverse()
-            .map(m => ({
-              role: (m.sender?.uuid === creator.fanvueId ? 'chatter' : 'fan') as 'chatter' | 'fan',
-              text: m.text ?? '',
-              sentAt: m.sentAt ?? '',
-            }))
+            .slice(0, 8).reverse()
+            .map(m => ({ role: (m.sender?.uuid === creator.fanvueId ? 'chatter' : 'fan') as 'chatter' | 'fan', text: m.text ?? '', sentAt: m.sentAt ?? '' }))
             .filter(m => m.text.trim().length > 0)
 
-          // Analyze with Claude (fire-and-forget so it doesn't block the response)
           analyzeMessage(content, contextMsgs, replyTimeSeconds).then(async (flags) => {
             for (const flag of flags) {
-              await prisma.flag.create({
-                data: {
-                  messageId: savedMsg.id,
-                  type: flag.type,
-                  category: flag.category ?? 'spelling',
-                  severity: flag.severity,
-                  description: flag.description,
-                  suggestion: flag.suggestion,
-                },
-              })
+              await prisma.flag.create({ data: { messageId: savedMsg.id, type: flag.type, category: flag.category ?? 'spelling', severity: flag.severity, description: flag.description, suggestion: flag.suggestion } })
             }
             await prisma.message.update({ where: { id: savedMsg.id }, data: { analysed: true } })
-          }).catch(() => { /* silent â€” don't block live feed on analysis error */ })
+          }).catch(() => {})
 
-          newMessages.push({
-            id: savedMsg.id,
-            messageUuid: msg.uuid,
-            model: creator.name,
-            modelUsername: creator.username,
-            chatter: chatterName,
-            chatterUsername,
+          msgs.push({
+            id: savedMsg.id, messageUuid: msg.uuid,
+            model: creator.name, modelUsername: creator.username,
+            chatter: chatterName, chatterUsername,
             fan: chat.user?.displayName ?? chat.user?.handle ?? 'Fan',
-            content,
-            sentAt: msg.sentAt ?? new Date().toISOString(),
-            hasMedia: msg.hasMedia ?? false,
-            replyTimeSeconds,
+            content, sentAt: msg.sentAt ?? new Date().toISOString(),
+            hasMedia: msg.hasMedia ?? false, replyTimeSeconds,
           })
         }
-      }
+      }))
     }
-  }
+    return msgs
+  }))
+
+  const newMessages = perCreator.flat()
 
   // Run seen alert check every 5 minutes (fire-and-forget)
   if (Date.now() - lastSeenCheck > SEEN_CHECK_INTERVAL) {

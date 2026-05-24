@@ -34,7 +34,7 @@ type Stats = {
   messagesToday: number
 }
 
-const POLL_INTERVAL = 4_000
+const POLL_INTERVAL = 10_000
 
 export default function DashboardPage() {
   const [messages, setMessages] = useState<LiveMessage[]>([])
