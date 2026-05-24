@@ -7,8 +7,8 @@ export async function GET(req: NextRequest) {
   const sinceDate = since ? new Date(since) : new Date(Date.now() - 60_000)
 
   const messages = await prisma.message.findMany({
-    where: { sentAt: { gt: sinceDate } },
-    orderBy: { sentAt: 'asc' },
+    where: { fetchedAt: { gt: sinceDate } },
+    orderBy: { fetchedAt: 'asc' },
     take: 100,
     include: { chatter: true, creator: true },
   })
