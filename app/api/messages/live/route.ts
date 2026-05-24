@@ -143,7 +143,9 @@ async function runSeenAlertCheck(
 
 export async function GET(req: NextRequest) {
   const since = req.nextUrl.searchParams.get('since')
-  const sinceDate = since ? new Date(since) : new Date(Date.now() - 60_000) // default: last 60s
+  let sinceDate = since ? new Date(since) : new Date(Date.now() - 60_000)
+  const maxLookback = new Date(Date.now() - 3 * 60 * 1000)
+  if (sinceDate < maxLookback) sinceDate = maxLookback
 
   const creators = await prisma.creator.findMany({
     where: { accessToken: { not: null } },
