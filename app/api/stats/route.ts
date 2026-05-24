@@ -21,6 +21,7 @@ export async function GET() {
     by: ['messageId'],
     where: { severity: 'CRITICAL', dismissed: false, createdAt: { gte: todayStart } },
     _count: { id: true },
+    orderBy: { _count: { id: 'desc' } },
     take: 5,
   })
 
