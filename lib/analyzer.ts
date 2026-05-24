@@ -70,8 +70,8 @@ This is the most important category. Evaluate the FULL conversation context, not
 
 ${isNsfwRestricted ? `CATEGORY 4 — NSFW RESTRICTION (severity: WARNING) — applies to THIS MODEL ONLY
 This creator does NOT produce adult/explicit content. Flag if the chatter crosses into heavily sexual territory:
-- NSFW: chatter is writing explicitly sexual messages — graphic descriptions of sex acts, explicit body part descriptions in a sexual context, dirty talk, sexting-style content.
-- Do NOT flag: mild flirting, compliments, suggestive but non-explicit language, "you're so hot", "I miss you", light teasing, romantic language. Only flag when it's clearly and unmistakably explicit sexual content.
+- NSFW: chatter explicitly names sexual body parts or acts in the message text itself — e.g. "check my boobs", "see my ass", "unlock to see me fully naked", "I want to f*** you", graphic dirty talk with explicit anatomical language.
+- Do NOT flag: promoting/selling content ("open it", "let me know what you think", "how risqué", "you'll love it"), suggestive language, flirting, innuendo, teasing, "you're so hot", "I miss you", anything that doesn't contain explicit sexual words directly.
 ` : ''}Do NOT flag: sexual content, adult themes, flirting, explicit language, encouraging spending, fan financial complaints, casual English, slang, missing punctuation, missing capitals, abbreviations${isNsfwRestricted ? ' (except explicit sexual content as defined above)' : ''}.
 
 ---
