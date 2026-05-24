@@ -170,7 +170,7 @@ async function syncOnce() {
             .map(m => ({ role: (m.sender?.uuid === creator.fanvueId ? 'chatter' : 'fan') as 'chatter' | 'fan', text: m.text ?? '', sentAt: m.sentAt ?? '' }))
             .filter(m => m.text.trim().length > 0)
 
-          analyzeMessage(content, contextMsgs, replyTimeSeconds).then(async (flags) => {
+          analyzeMessage(content, contextMsgs, replyTimeSeconds, creator.username).then(async (flags) => {
             for (const flag of flags) {
               await prisma.flag.create({ data: { messageId: savedMsg.id, type: flag.type, category: flag.category ?? 'spelling', severity: flag.severity, description: flag.description, suggestion: flag.suggestion } })
             }

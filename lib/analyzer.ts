@@ -18,10 +18,13 @@ export type ContextMessage = {
   sentAt: string
 }
 
+const NSFW_RESTRICTED_USERNAMES = ['alishalehmann7', 'kysrerae', 'dinahnya']
+
 export async function analyzeMessage(
   content: string,
   context: ContextMessage[] = [],
-  replyTimeSeconds: number | null = null
+  replyTimeSeconds: number | null = null,
+  creatorUsername?: string | null
 ): Promise<FlagResult[]> {
   if (!content || content.trim().length < 3) return []
 
@@ -36,6 +39,8 @@ export async function analyzeMessage(
         ? `${replyTimeSeconds} seconds`
         : `${Math.round(replyTimeSeconds / 60)} minutes`} to reply to the fan's last message.\n\n`
     : ''
+
+  const isNsfwRestricted = creatorUsername ? NSFW_RESTRICTED_USERNAMES.includes(creatorUsername.toLowerCase()) : false
 
   const prompt = `You are a QC system for a Fanvue fan engagement agency. Analyze the chatter's message in THREE independent categories. Return ONLY the flags that are genuine issues.
 
@@ -63,12 +68,16 @@ This is the most important category. Evaluate the FULL conversation context, not
   * Over 20 minutes when fan sent a direct engaged message or question
   * Do NOT flag if fan sent a simple one-liner or if the conversation doesn't suggest urgency
 
-Do NOT flag: sexual content, adult themes, flirting, explicit language, encouraging spending, fan financial complaints, casual English, slang, missing punctuation, missing capitals, abbreviations.
+${isNsfwRestricted ? `CATEGORY 4 — NSFW RESTRICTION (severity: WARNING) — applies to THIS MODEL ONLY
+This creator does NOT produce adult/explicit content. Flag if the chatter crosses into heavily sexual territory:
+- NSFW: chatter is writing explicitly sexual messages — graphic descriptions of sex acts, explicit body part descriptions in a sexual context, dirty talk, sexting-style content.
+- Do NOT flag: mild flirting, compliments, suggestive but non-explicit language, "you're so hot", "I miss you", light teasing, romantic language. Only flag when it's clearly and unmistakably explicit sexual content.
+` : ''}Do NOT flag: sexual content, adult themes, flirting, explicit language, encouraging spending, fan financial complaints, casual English, slang, missing punctuation, missing capitals, abbreviations${isNsfwRestricted ? ' (except explicit sexual content as defined above)' : ''}.
 
 ---
 
 Respond ONLY with a JSON array. Each item must have:
-- type: "POACHING" | "TOS" | "INSULT" | "SPELLING" | "GRAMMAR" | "DRY" | "SLOW_REPLY"
+- type: "POACHING" | "TOS" | "INSULT" | "SPELLING" | "GRAMMAR" | "DRY" | "SLOW_REPLY" | "NSFW"
 - category: "critical" | "spelling" | "quality"
 - severity: "CRITICAL" (only for category critical) | "WARNING" (for spelling and quality)
 - description: 1-2 sentences explaining the specific issue
