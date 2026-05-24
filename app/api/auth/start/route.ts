@@ -6,14 +6,17 @@ function base64url(buf: Buffer) {
   return buf.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '')
 }
 
-export async function GET() {
+export async function GET(req: Request) {
   // PKCE: generate verifier + challenge
   const verifier = base64url(crypto.randomBytes(32))
   const challenge = base64url(crypto.createHash('sha256').update(verifier).digest())
 
+  const reqUrl = new URL(req.url)
+  const baseUrl = `${reqUrl.protocol}//${reqUrl.host}`
+
   const params = new URLSearchParams({
     client_id: process.env.FANVUE_CLIENT_ID!,
-    redirect_uri: `${process.env.APP_URL}/api/auth/callback`,
+    redirect_uri: `${baseUrl}/api/auth/callback`,
     response_type: 'code',
     scope: 'openid offline read:agency read:chat read:fan read:self',
     state: crypto.randomBytes(16).toString('hex'),

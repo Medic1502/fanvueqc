@@ -45,7 +45,7 @@ export async function GET(req: NextRequest) {
     body: new URLSearchParams({
       grant_type: 'authorization_code',
       code,
-      redirect_uri: `${process.env.APP_URL}/api/auth/callback`,
+      redirect_uri: `${new URL(req.url).protocol}//${new URL(req.url).host}/api/auth/callback`,
       code_verifier: verifier,
     }),
   })
