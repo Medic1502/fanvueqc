@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { analyzeMessage } from '@/lib/analyzer'
@@ -109,7 +110,7 @@ async function runSeenAlertCheck(
       const isFanMsg = lm.sentByUserId === null && lm.senderUuid !== creator.fanvueId
 
       if (isFanMsg && lmAge >= SEEN_THRESHOLD_MS && lmAge <= SEEN_MAX_AGE_MS) {
-        // Fan waiting >30min — upsert seen alert (reset if fan wrote again)
+        // Fan waiting >30min â€” upsert seen alert (reset if fan wrote again)
         await prisma.seenAlert.upsert({
           where: { fanUuid_creatorId: { fanUuid, creatorId: creator.id } },
           update: {
@@ -128,7 +129,7 @@ async function runSeenAlertCheck(
           },
         })
       } else if (!isFanMsg) {
-        // Chatter replied — resolve any open seen alert for this chat
+        // Chatter replied â€” resolve any open seen alert for this chat
         await prisma.seenAlert.updateMany({
           where: { fanUuid, creatorId: creator.id, resolvedAt: null, dismissed: false },
           data: { resolvedAt: new Date() },
@@ -238,7 +239,7 @@ export async function GET(req: NextRequest) {
             } catch { /* keep default name */ }
           }
 
-          // Upsert chatter — never overwrite name (preserves user renames)
+          // Upsert chatter â€” never overwrite name (preserves user renames)
           const chatterRecord = await prisma.chatter.upsert({
             where: { fanvueId: chatterFanvueId },
             update: { username: chatterUsername },
@@ -287,7 +288,7 @@ export async function GET(req: NextRequest) {
               })
             }
             await prisma.message.update({ where: { id: savedMsg.id }, data: { analysed: true } })
-          }).catch(() => { /* silent — don't block live feed on analysis error */ })
+          }).catch(() => { /* silent â€” don't block live feed on analysis error */ })
 
           newMessages.push({
             id: savedMsg.id,

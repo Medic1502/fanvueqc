@@ -1,3 +1,4 @@
+export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import { format } from 'date-fns'

@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-dynamic'
 'use client'
 import { useEffect, useRef, useState } from 'react'
 import { formatDistanceToNow, format } from 'date-fns'
@@ -107,7 +108,7 @@ export default function DashboardPage() {
               <div className={`text-2xl font-bold ${stats.criticalToday > 0 ? 'text-red-400' : 'text-zinc-100'}`}>
                 {stats.criticalToday}
               </div>
-              <div className="text-zinc-500 text-xs">Kritičnih danas</div>
+              <div className="text-zinc-500 text-xs">KritiÄnih danas</div>
             </div>
           </Link>
 
@@ -172,8 +173,8 @@ export default function DashboardPage() {
             {status === 'live'
               ? <><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />LIVE</>
               : status === 'error'
-              ? <><WifiOff size={11} />Greška</>
-              : <><span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-pulse" />Čekam...</>
+              ? <><WifiOff size={11} />GreÅ¡ka</>
+              : <><span className="w-1.5 h-1.5 rounded-full bg-zinc-500 animate-pulse" />ÄŒekam...</>
             }
           </div>
         </div>
@@ -192,8 +193,8 @@ export default function DashboardPage() {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mb-4 block" />
-            <p className="text-zinc-400 text-sm font-medium">Čekam poruke...</p>
-            <p className="text-zinc-600 text-xs mt-1">Učitavam iz baze i proveravam za nove svakih 10s.</p>
+            <p className="text-zinc-400 text-sm font-medium">ÄŒekam poruke...</p>
+            <p className="text-zinc-600 text-xs mt-1">UÄitavam iz baze i proveravam za nove svakih 10s.</p>
           </div>
         ) : (
           <div className="divide-y divide-zinc-800/50">
@@ -231,7 +232,7 @@ function MessageRow({ msg, isNew }: { msg: LiveMessage; isNew: boolean }) {
 
       <div className="min-w-0 px-2">
         {msg.hasMedia && !msg.content
-          ? <span className="text-zinc-500 text-sm italic">📎 Media</span>
+          ? <span className="text-zinc-500 text-sm italic">ðŸ“Ž Media</span>
           : <span className="text-zinc-300 text-sm leading-relaxed line-clamp-2">{msg.content}</span>
         }
       </div>
@@ -244,7 +245,7 @@ function MessageRow({ msg, isNew }: { msg: LiveMessage; isNew: boolean }) {
         <div className="text-zinc-300 text-xs font-mono">{format(new Date(msg.sentAt), 'HH:mm:ss')}</div>
         <div className="text-zinc-600 text-xs">{formatDistanceToNow(new Date(msg.sentAt), { addSuffix: true })}</div>
         {formatReply(msg.replyTimeSeconds) && (
-          <div className="text-blue-400 text-xs mt-0.5">⏱ {formatReply(msg.replyTimeSeconds)}</div>
+          <div className="text-blue-400 text-xs mt-0.5">â± {formatReply(msg.replyTimeSeconds)}</div>
         )}
       </div>
     </div>

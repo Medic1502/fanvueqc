@@ -1,10 +1,11 @@
+﻿export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 function popupResult(success: boolean, message: string) {
   const color = success ? '#34d399' : '#f87171'
-  const icon = success ? '✅' : '❌'
-  const sub = success ? 'Ovaj prozor se zatvara...' : 'Zatvori prozor i pokušaj ponovo.'
+  const icon = success ? 'âœ…' : 'âŒ'
+  const sub = success ? 'Ovaj prozor se zatvara...' : 'Zatvori prozor i pokuÅ¡aj ponovo.'
   const html = `<!DOCTYPE html><html><head><meta charset="utf-8">
 <style>body{font-family:sans-serif;background:#0f0f11;color:#f1f1f3;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;flex-direction:column;gap:12px;text-align:center;padding:24px}
 .icon{font-size:48px}.msg{color:${color};font-size:15px}.sub{color:#71717a;font-size:13px}</style></head>
@@ -23,12 +24,12 @@ export async function GET(req: NextRequest) {
   const error = searchParams.get('error')
 
   if (error || !code) {
-    return popupResult(false, `Greška: ${error ?? 'no_code'}`)
+    return popupResult(false, `GreÅ¡ka: ${error ?? 'no_code'}`)
   }
 
   const verifier = req.cookies.get('pkce_verifier')?.value
   if (!verifier) {
-    return popupResult(false, 'Greška: PKCE verifier nije pronađen. Pokušaj ponovo.')
+    return popupResult(false, 'GreÅ¡ka: PKCE verifier nije pronaÄ‘en. PokuÅ¡aj ponovo.')
   }
 
   const credentials = Buffer.from(
@@ -51,7 +52,7 @@ export async function GET(req: NextRequest) {
 
   if (!tokenRes.ok) {
     const text = await tokenRes.text()
-    return popupResult(false, `Token greška: ${tokenRes.status}. ${text.slice(0, 120)}`)
+    return popupResult(false, `Token greÅ¡ka: ${tokenRes.status}. ${text.slice(0, 120)}`)
   }
 
   const tokenData = await tokenRes.json()
@@ -67,7 +68,7 @@ export async function GET(req: NextRequest) {
   })
 
   if (!profileRes.ok) {
-    return popupResult(false, 'Nije moguće učitati profil. Pokušaj ponovo.')
+    return popupResult(false, 'Nije moguÄ‡e uÄitati profil. PokuÅ¡aj ponovo.')
   }
 
   const profile = await profileRes.json()
@@ -79,7 +80,7 @@ export async function GET(req: NextRequest) {
       update: { name: displayName, username: profile.handle, accessToken, refreshToken, connectedAt: new Date() },
       create: { fanvueId: profile.uuid, name: displayName, username: profile.handle, accessToken, refreshToken, connectedAt: new Date() },
     })
-    return popupResult(true, `${displayName} je uspešno povezan!`)
+    return popupResult(true, `${displayName} je uspeÅ¡no povezan!`)
   }
 
   // Admin/agency account
@@ -94,5 +95,5 @@ export async function GET(req: NextRequest) {
   }
   writeFileSync(envPath, envContent)
 
-  return popupResult(true, `Admin nalog (${displayName}) je sačuvan.`)
+  return popupResult(true, `Admin nalog (${displayName}) je saÄuvan.`)
 }

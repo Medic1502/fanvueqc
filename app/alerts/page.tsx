@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-dynamic'
 'use client'
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
@@ -77,13 +78,13 @@ function FlagCard({ flag, onAction }: {
             )}
             <span className="text-zinc-500 text-xs font-mono">{TYPE_LABEL[flag.type] ?? flag.type}</span>
             <span className="text-zinc-400 text-xs font-medium">{flag.message.chatter.name}</span>
-            <span className="text-zinc-700 text-xs">→ {flag.message.creator.name}</span>
+            <span className="text-zinc-700 text-xs">â†’ {flag.message.creator.name}</span>
             {flag.message.fanName && (
               <span className="text-zinc-700 text-xs">| {flag.message.fanName}</span>
             )}
             <div className="ml-auto flex items-center gap-2">
               {formatReply(flag.message.replyTimeSeconds) && (
-                <span className="text-blue-400 text-xs">⏱ {formatReply(flag.message.replyTimeSeconds)}</span>
+                <span className="text-blue-400 text-xs">â± {formatReply(flag.message.replyTimeSeconds)}</span>
               )}
               <span className="text-zinc-600 text-xs">{format(new Date(flag.message.sentAt), 'dd.MM HH:mm')}</span>
             </div>
@@ -145,7 +146,7 @@ function Section({ title, icon, count, color, flags, onAction, defaultOpen = fal
       </button>
       {open && (
         count === 0
-          ? <div className="px-4 py-4 text-zinc-600 text-sm text-center border-t border-zinc-800">Nema grešaka u ovoj kategoriji</div>
+          ? <div className="px-4 py-4 text-zinc-600 text-sm text-center border-t border-zinc-800">Nema greÅ¡aka u ovoj kategoriji</div>
           : <div className="border-t border-zinc-800">
               {flags.map(f => <FlagCard key={f.id} flag={f} onAction={onAction} />)}
             </div>
@@ -186,7 +187,7 @@ export default function AlertsPage() {
   }
 
   async function handleReset() {
-    if (!confirm('Obriši sve alertove? Ovo se ne može poništiti.')) return
+    if (!confirm('ObriÅ¡i sve alertove? Ovo se ne moÅ¾e poniÅ¡titi.')) return
     await fetch('/api/reset', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -204,7 +205,7 @@ export default function AlertsPage() {
       <div className="flex items-start justify-between mb-5">
         <div>
           <h1 className="text-2xl font-bold text-zinc-100">Alerta</h1>
-          <p className="text-zinc-500 text-sm mt-1">Nepregledane greške po kategorijama</p>
+          <p className="text-zinc-500 text-sm mt-1">Nepregledane greÅ¡ke po kategorijama</p>
         </div>
         <div className="flex items-center gap-3">
           {/* Chatter filter */}
@@ -226,7 +227,7 @@ export default function AlertsPage() {
       </div>
 
       {loading ? (
-        <div className="text-zinc-500 text-sm">Učitavam...</div>
+        <div className="text-zinc-500 text-sm">UÄitavam...</div>
       ) : (
         <div className="space-y-3">
           <Section
@@ -239,7 +240,7 @@ export default function AlertsPage() {
             defaultOpen
           />
           <Section
-            title="Pravopisne greške"
+            title="Pravopisne greÅ¡ke"
             icon={<AlertTriangle size={14} className="text-blue-400" />}
             color="text-blue-400 bg-blue-900/30"
             count={spelling.length}

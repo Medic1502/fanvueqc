@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-dynamic'
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { randomUUID } from 'crypto'
@@ -28,7 +29,7 @@ async function refreshAccessToken(creatorId: string, refreshToken: string): Prom
   return data.access_token
 }
 
-// tRPC SuperJSON payload — matches exactly what Fanvue web app sends
+// tRPC SuperJSON payload â€” matches exactly what Fanvue web app sends
 function buildTrpcPayload(recipientUuid: string, text: string) {
   return {
     json: {
@@ -69,7 +70,7 @@ export async function POST(req: NextRequest) {
     include: { creator: true },
   })
 
-  if (!alert) return NextResponse.json({ error: 'Alert nije pronađen u bazi' }, { status: 404 })
+  if (!alert) return NextResponse.json({ error: 'Alert nije pronaÄ‘en u bazi' }, { status: 404 })
 
   const creator = alert.creator
   if (!creator.accessToken) return NextResponse.json({ error: 'Creator nema access token' }, { status: 400 })
@@ -90,7 +91,7 @@ export async function POST(req: NextRequest) {
 
   let res = await doSend(token)
 
-  // Token expired — refresh and retry
+  // Token expired â€” refresh and retry
   if (res.status === 401 && creator.refreshToken) {
     const newToken = await refreshAccessToken(creator.id, creator.refreshToken)
     if (!newToken) return NextResponse.json({ error: 'Token refresh failed' }, { status: 401 })
@@ -106,7 +107,7 @@ export async function POST(req: NextRequest) {
     )
   }
 
-  // Message sent — resolve the seen alert
+  // Message sent â€” resolve the seen alert
   await prisma.seenAlert.update({
     where: { id: alertId },
     data: { resolvedAt: new Date() },

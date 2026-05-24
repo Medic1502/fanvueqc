@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-dynamic'
 import { prisma } from '@/lib/prisma'
 import { format } from 'date-fns'
 
@@ -75,7 +76,7 @@ export default async function MessagesPage({
             <div key={msg.id} className={`card ${msg.flags.length > 0 ? 'border-zinc-700' : ''}`}>
               <div className="flex items-center gap-3 mb-2">
                 <span className="text-zinc-300 text-xs font-medium">{msg.chatter.name}</span>
-                <span className="text-zinc-700 text-xs">→</span>
+                <span className="text-zinc-700 text-xs">â†’</span>
                 <span className="text-zinc-500 text-xs">{msg.creator.name}</span>
                 {msg.fanName && (
                   <>

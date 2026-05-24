@@ -1,3 +1,4 @@
+﻿export const dynamic = 'force-dynamic'
 'use client'
 import { useEffect, useState } from 'react'
 import { formatDistanceToNow, format } from 'date-fns'
@@ -49,7 +50,7 @@ function AlertCard({
               ? `${Math.floor(waitMins / 60)}h${waitMins % 60 > 0 ? ` ${waitMins % 60}m` : ''}`
               : `${waitMins}m`}
           </div>
-          <div className="text-zinc-600 text-xs">čeka</div>
+          <div className="text-zinc-600 text-xs">Äeka</div>
         </div>
 
         {/* Fan + creator info */}
@@ -58,7 +59,7 @@ function AlertCard({
             <span className="text-zinc-100 font-semibold text-sm">
               {alert.fanName ?? 'Fan'}
             </span>
-            <span className="text-zinc-700 text-xs">→</span>
+            <span className="text-zinc-700 text-xs">â†’</span>
             <span className="text-zinc-400 text-xs">{alert.creator.name}</span>
             {alert.creator.username && (
               <span className="text-zinc-600 text-xs">@{alert.creator.username}</span>
@@ -71,7 +72,7 @@ function AlertCard({
           )}
           <div className="text-zinc-700 text-xs mt-1">
             Poslao {format(new Date(alert.fanLastMsgAt), 'dd.MM u HH:mm')}
-            {' · '}
+            {' Â· '}
             Alert od {formatDistanceToNow(new Date(alert.createdAt), { addSuffix: true })}
           </div>
         </div>
@@ -133,7 +134,7 @@ export default function SeenPage() {
   }
 
   async function handleClearAll() {
-    if (!confirm('Obriši sve seen alertove?')) return
+    if (!confirm('ObriÅ¡i sve seen alertove?')) return
     await fetch('/api/seen', { method: 'DELETE' })
     setAlerts([])
   }
@@ -147,13 +148,13 @@ export default function SeenPage() {
             Seenano
           </h1>
           <p className="text-zinc-500 text-sm mt-1">
-            Fanovi koji čekaju odgovor više od 30 minuta
+            Fanovi koji Äekaju odgovor viÅ¡e od 30 minuta
           </p>
         </div>
         <div className="flex items-center gap-3">
           {alerts.length > 0 && (
             <div className="px-3 py-1.5 bg-purple-900/20 border border-purple-800/40 rounded-lg">
-              <span className="text-purple-400 text-sm font-semibold">{alerts.length} čeka</span>
+              <span className="text-purple-400 text-sm font-semibold">{alerts.length} Äeka</span>
             </div>
           )}
           <button
@@ -161,19 +162,19 @@ export default function SeenPage() {
             className="flex items-center gap-2 px-3 py-2 bg-red-900/20 text-red-400 border border-red-800/40 rounded-lg text-sm hover:bg-red-900/40 transition-colors"
           >
             <Trash2 size={13} />
-            Obriši sve
+            ObriÅ¡i sve
           </button>
         </div>
       </div>
 
       {loading ? (
-        <div className="text-zinc-500 text-sm">Učitavam...</div>
+        <div className="text-zinc-500 text-sm">UÄitavam...</div>
       ) : alerts.length === 0 ? (
         <div className="card text-center py-16">
           <Eye size={32} className="text-zinc-700 mx-auto mb-3" />
           <p className="text-zinc-400 font-medium">Nema seenovanih fanova</p>
           <p className="text-zinc-600 text-sm mt-1">
-            Pojavljivaće se ovde kad fan čeka odgovor duže od 30 min
+            PojavljivaÄ‡e se ovde kad fan Äeka odgovor duÅ¾e od 30 min
           </p>
         </div>
       ) : (
