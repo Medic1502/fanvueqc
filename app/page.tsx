@@ -85,6 +85,9 @@ export default function DashboardPage() {
           // Set since to the most recent message time so we only poll for newer ones
           if (existing.length > 0) {
             sinceRef.current = existing[0].sentAt
+          } else {
+            // Fresh DB — go back 30 min to pick up recent messages
+            sinceRef.current = new Date(Date.now() - 30 * 60 * 1000).toISOString()
           }
         }
       } catch { /* silent */ }
