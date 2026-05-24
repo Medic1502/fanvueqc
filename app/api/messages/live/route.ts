@@ -298,7 +298,7 @@ export async function GET(req: NextRequest) {
             chatterUsername,
             fan: chat.user?.displayName ?? chat.user?.handle ?? 'Fan',
             content,
-            sentAt: msg.sentAt,
+            sentAt: msg.sentAt ?? new Date().toISOString(),
             hasMedia: msg.hasMedia ?? false,
             replyTimeSeconds,
           })
