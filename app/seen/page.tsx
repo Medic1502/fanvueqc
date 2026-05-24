@@ -1,5 +1,5 @@
-﻿export const dynamic = 'force-dynamic'
-'use client'
+﻿'use client'
+export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
 import { formatDistanceToNow, format } from 'date-fns'
 import { Eye, X, Check, Trash2, ExternalLink } from 'lucide-react'

@@ -1,5 +1,5 @@
-﻿export const dynamic = 'force-dynamic'
-'use client'
+﻿'use client'
+export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
 import { ShieldAlert, AlertTriangle, MessageCircle, CheckCheck, X, ChevronDown, ChevronRight } from 'lucide-react'
