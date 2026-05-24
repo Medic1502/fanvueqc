@@ -25,6 +25,7 @@ export async function GET(req: Request) {
     code_challenge: challenge,
     code_challenge_method: 'S256',
     prompt: 'login',
+    max_age: '0',
   })
 
   const authUrl = `https://auth.fanvue.com/oauth2/auth?${params}`
