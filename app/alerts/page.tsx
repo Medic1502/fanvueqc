@@ -2,7 +2,7 @@
 export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
 import { format } from 'date-fns'
-import { ShieldAlert, AlertTriangle, MessageCircle, CheckCheck, X, ChevronDown, ChevronRight } from 'lucide-react'
+import { ShieldAlert, AlertTriangle, MessageCircle, CheckCheck, X, ChevronDown, ChevronRight, CheckSquare } from 'lucide-react'
 
 type Flag = {
   id: string
@@ -186,12 +186,27 @@ export default function AlertsPage() {
     setFlags(prev => prev.filter(f => f.id !== id))
   }
 
+  async function handleMarkAllRead() {
+    const body: Record<string, string> = { action: 'reviewAll' }
+    if (chatterId !== 'all') body.chatterId = chatterId
+    await fetch('/api/flags', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    })
+    setFlags([])
+  }
+
   async function handleReset() {
-    if (!confirm('ObriÅ¡i sve alertove? Ovo se ne moÅ¾e poniÅ¡titi.')) return
+    const selectedChatter = chatters.find(c => c.id === chatterId)
+    const label = selectedChatter ? `alertove za ${selectedChatter.name}` : 'sve alertove'
+    if (!confirm(`ObriÅ¡i ${label}? Ovo se ne moÅ¾e poniÅ¡titi.`)) return
+    const body: Record<string, string> = { target: 'alerts' }
+    if (chatterId !== 'all') body.chatterId = chatterId
     await fetch('/api/reset', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ target: 'alerts' }),
+      body: JSON.stringify(body),
     })
     setFlags([])
   }
@@ -217,11 +232,21 @@ export default function AlertsPage() {
             <option value="all">Svi chatteri</option>
             {chatters.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
+          {flags.length > 0 && (
+            <button
+              onClick={handleMarkAllRead}
+              className="flex items-center gap-1.5 px-3 py-2 bg-brand-600/20 text-brand-400 border border-brand-700/50 rounded-lg text-xs hover:bg-brand-600/40 transition-colors"
+            >
+              <CheckSquare size={12} /> Označi sve pročitano
+            </button>
+          )}
           <button
             onClick={handleReset}
             className="px-3 py-2 bg-red-900/20 text-red-400 border border-red-800/40 rounded-lg text-xs hover:bg-red-900/40 transition-colors"
           >
-            Resetuj sve
+            {chatterId !== 'all'
+              ? `Resetuj ${chatters.find(c => c.id === chatterId)?.name ?? 'chattera'}`
+              : 'Resetuj sve'}
           </button>
         </div>
       </div>

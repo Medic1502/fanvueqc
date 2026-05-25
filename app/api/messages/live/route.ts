@@ -20,6 +20,7 @@ export async function GET(req: NextRequest) {
       model: m.creator.name,
       modelUsername: m.creator.username,
       chatter: m.chatter.name,
+      chatterId: m.chatter.id,
       chatterUsername: m.chatter.username,
       fan: m.fanName ?? 'Fan',
       content: m.content,

@@ -10,6 +10,7 @@ type LiveMessage = {
   model: string
   modelUsername: string | null
   chatter: string
+  chatterId: string
   chatterUsername: string | null
   fan: string
   content: string
@@ -17,6 +18,8 @@ type LiveMessage = {
   hasMedia: boolean
   replyTimeSeconds: number | null
 }
+
+type Chatter = { id: string; name: string }
 
 function formatReply(s: number | null): string | null {
   if (s === null) return null
@@ -38,6 +41,8 @@ const POLL_INTERVAL = 10_000
 
 export default function DashboardPage() {
   const [messages, setMessages] = useState<LiveMessage[]>([])
+  const [chatters, setChatters] = useState<Chatter[]>([])
+  const [chatterId, setChatterId] = useState('all')
   const [status, setStatus] = useState<'connecting' | 'live' | 'error'>('connecting')
   const [lastChecked, setLastChecked] = useState<string | null>(null)
   const [newCount, setNewCount] = useState(0)
@@ -90,10 +95,13 @@ export default function DashboardPage() {
       } catch { /* silent */ }
       poll()
     }
+    fetch('/api/chatters').then(r => r.json()).then((data: Chatter[]) => setChatters(data)).catch(() => {})
     init()
     const interval = setInterval(poll, POLL_INTERVAL)
     return () => clearInterval(interval)
   }, [])
+
+  const filtered = chatterId === 'all' ? messages : messages.filter(m => m.chatterId === chatterId)
 
   return (
     <div>
@@ -160,6 +168,16 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex items-center gap-3">
+          {chatters.length > 0 && (
+            <select
+              value={chatterId}
+              onChange={e => setChatterId(e.target.value)}
+              className="bg-zinc-900 border border-zinc-800 text-zinc-300 text-xs rounded-lg px-3 py-1.5 outline-none hover:border-zinc-600 transition-colors"
+            >
+              <option value="all">Svi chatteri</option>
+              {chatters.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+            </select>
+          )}
           {lastChecked && (
             <span className="text-zinc-600 text-xs">
               {format(new Date(lastChecked), 'HH:mm:ss')}
@@ -190,15 +208,15 @@ export default function DashboardPage() {
           <div className="text-zinc-500 text-xs font-medium uppercase tracking-wide text-right">Vreme</div>
         </div>
 
-        {messages.length === 0 ? (
+        {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16 text-center">
             <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse mb-4 block" />
-            <p className="text-zinc-400 text-sm font-medium">ÄŒekam poruke...</p>
+            <p className="text-zinc-400 text-sm font-medium">{chatterId === 'all' ? 'ÄŒekam poruke...' : 'Nema poruka za ovog chattera'}</p>
             <p className="text-zinc-600 text-xs mt-1">UÄitavam iz baze i proveravam za nove svakih 10s.</p>
           </div>
         ) : (
           <div className="divide-y divide-zinc-800/50">
-            {messages.map((msg, i) => (
+            {filtered.map((msg, i) => (
               <MessageRow key={msg.id} msg={msg} isNew={i < 3 && newCount > 0} />
             ))}
           </div>

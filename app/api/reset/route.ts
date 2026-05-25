@@ -3,10 +3,12 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 
 export async function POST(req: NextRequest) {
-  const { target } = await req.json()
+  const { target, chatterId } = await req.json()
 
   if (target === 'alerts') {
-    const { count } = await prisma.flag.deleteMany({})
+    const { count } = await prisma.flag.deleteMany({
+      where: chatterId ? { message: { chatterId } } : {},
+    })
     return NextResponse.json({ ok: true, deleted: count, target: 'alerts' })
   }
 

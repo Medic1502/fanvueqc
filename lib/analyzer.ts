@@ -68,9 +68,9 @@ This is the most important category. Evaluate the FULL conversation context, not
   * Over 20 minutes when fan sent a direct engaged message or question
   * Do NOT flag if fan sent a simple one-liner or if the conversation doesn't suggest urgency
 
-${isNsfwRestricted ? `CATEGORY 4 — NSFW RESTRICTION (severity: WARNING) — applies to THIS MODEL ONLY
-This creator does NOT produce adult/explicit content. Flag if the chatter crosses into heavily sexual territory:
-- NSFW: chatter explicitly names sexual body parts or acts in the message text itself — e.g. "check my boobs", "see my ass", "unlock to see me fully naked", "I want to f*** you", graphic dirty talk with explicit anatomical language.
+${isNsfwRestricted ? `CATEGORY 4 — NSFW RESTRICTION (severity: CRITICAL) — applies to THIS MODEL ONLY
+This creator does NOT produce adult/explicit content. Flag as a CRITICAL violation if the chatter crosses into explicit sexual territory:
+- NSFW: chatter explicitly names sexual body parts or acts in the message text itself — e.g. "check my boobs", "see my ass", "unlock to see me fully naked", "it's full nude", "I want to f*** you", graphic dirty talk with explicit anatomical language.
 - Do NOT flag: promoting/selling content ("open it", "let me know what you think", "how risqué", "you'll love it"), suggestive language, flirting, innuendo, teasing, "you're so hot", "I miss you", anything that doesn't contain explicit sexual words directly.
 ` : ''}Do NOT flag: sexual content, adult themes, flirting, explicit language, encouraging spending, fan financial complaints, casual English, slang, missing punctuation, missing capitals, abbreviations${isNsfwRestricted ? ' (except explicit sexual content as defined above)' : ''}.
 
@@ -79,7 +79,7 @@ This creator does NOT produce adult/explicit content. Flag if the chatter crosse
 Respond ONLY with a JSON array. Each item must have:
 - type: "POACHING" | "TOS" | "INSULT" | "SPELLING" | "GRAMMAR" | "DRY" | "SLOW_REPLY" | "NSFW"
 - category: "critical" | "spelling" | "quality"
-- severity: "CRITICAL" (only for category critical) | "WARNING" (for spelling and quality)
+- severity: "CRITICAL" (for critical category and NSFW on restricted models) | "WARNING" (for spelling and quality)
 - description: 1-2 sentences explaining the specific issue
 - suggestion: optional improvement
 

@@ -39,7 +39,21 @@ export async function GET(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
-  const { id, action } = await req.json()
+  const body = await req.json()
+  const { id, action, chatterId } = body
+
+  if (action === 'reviewAll') {
+    const result = await prisma.flag.updateMany({
+      where: {
+        reviewed: false,
+        dismissed: false,
+        ...(chatterId ? { message: { chatterId } } : {}),
+      },
+      data: { reviewed: true },
+    })
+    return NextResponse.json({ ok: true, count: result.count })
+  }
+
   if (!id || !action) return NextResponse.json({ error: 'missing id or action' }, { status: 400 })
 
   if (action === 'delete') {
