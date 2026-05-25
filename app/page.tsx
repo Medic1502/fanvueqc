@@ -45,10 +45,9 @@ export default function DashboardPage() {
   const [chatterId, setChatterId] = useState('all')
   const [status, setStatus] = useState<'connecting' | 'live' | 'error'>('connecting')
   const [lastChecked, setLastChecked] = useState<string | null>(null)
-  const [newCount, setNewCount] = useState(0)
+  const [newMsgIds, setNewMsgIds] = useState<Set<string>>(new Set())
   const [stats, setStats] = useState<Stats | null>(null)
   const sinceRef = useRef<string>(new Date().toISOString())
-  const newCountRef = useRef(0)
 
   async function fetchStats() {
     try {
@@ -64,9 +63,13 @@ export default function DashboardPage() {
       const data = await res.json()
 
       if (data.messages?.length > 0) {
-        setMessages(prev => [...data.messages.reverse(), ...prev].slice(0, 300))
-        newCountRef.current += data.messages.length
-        setNewCount(newCountRef.current)
+        const incoming: LiveMessage[] = data.messages.reverse()
+        setMessages(prev => [...incoming, ...prev].slice(0, 300))
+        setNewMsgIds(prev => {
+          const next = new Set(prev)
+          incoming.forEach(m => next.add(m.id))
+          return next
+        })
         fetchStats()
       }
 
@@ -87,10 +90,7 @@ export default function DashboardPage() {
         if (res.ok) {
           const existing: LiveMessage[] = await res.json()
           setMessages(existing)
-          // Set since to the most recent message time so we only poll for newer ones
-          if (existing.length > 0) {
-            sinceRef.current = existing[0].sentAt
-          }
+          sinceRef.current = new Date().toISOString()
         }
       } catch { /* silent */ }
       poll()
@@ -102,6 +102,7 @@ export default function DashboardPage() {
   }, [])
 
   const filtered = chatterId === 'all' ? messages : messages.filter(m => m.chatterId === chatterId)
+  const filteredNewCount = filtered.filter(m => newMsgIds.has(m.id)).length
 
   return (
     <div>
@@ -160,9 +161,9 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-3">
           <h2 className="text-base font-semibold text-zinc-100">Live Monitor</h2>
-          {newCount > 0 && (
+          {filteredNewCount > 0 && (
             <span className="text-xs text-zinc-400 bg-zinc-800 px-2 py-0.5 rounded-full">
-              +{newCount} novih
+              +{filteredNewCount} novih
             </span>
           )}
         </div>
@@ -217,7 +218,7 @@ export default function DashboardPage() {
         ) : (
           <div className="divide-y divide-zinc-800/50">
             {filtered.map((msg, i) => (
-              <MessageRow key={msg.id} msg={msg} isNew={i < 3 && newCount > 0} />
+              <MessageRow key={msg.id} msg={msg} isNew={newMsgIds.has(msg.id)} />
             ))}
           </div>
         )}
